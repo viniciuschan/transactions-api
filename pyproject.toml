@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "transactions-api"
+version = "0.1.0"
+description = "Rest API to deal with simple transactions"
+authors = ["Vinicius Chan <vinicius.chan@olist.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+django = "==4.0.3"
+djangorestframework = "==3.13.1"
+
+[tool.poetry.dev-dependencies]
+ipython = "*"
+pre-commit = "*"
+pytest = "*"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
