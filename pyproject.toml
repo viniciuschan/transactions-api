@@ -9,6 +9,7 @@ known_local_folder = ["src", "tests", "transactions_api"]
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "transactions_api.settings"
+addopts = "-vv"
 
 [tool.poetry]
 name = "transactions-api"
@@ -26,6 +27,7 @@ django-rest-swagger = "*"
 [tool.poetry.dev-dependencies]
 ipython = "*"
 factory-boy = "*"
+faker = "*"
 pre-commit = "*"
 pytest = "*"
 pytest-django = "*"
