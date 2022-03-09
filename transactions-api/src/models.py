@@ -1,13 +1,14 @@
 import uuid
+from decimal import Decimal
 
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 
 class Transaction(models.Model):
-    FLOW_CHOICES = [
-        ("IN", "Inflow"),
-        ("OU", "Outflow"),
-    ]
+    class Type(models.TextChoices):
+        INFLOW = "IN", _("Inflow")
+        OUTFLOW = "OU", _("Outflow")
 
     id = models.UUIDField(
         primary_key=True,
@@ -17,10 +18,12 @@ class Transaction(models.Model):
     )
     reference = models.CharField(max_length=20, unique=True)
     date = models.DateField()
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-    kind = models.CharField(max_length=2, choices=FLOW_CHOICES)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal())
+    kind = models.CharField(max_length=2, choices=Type.choices)
     category = models.ForeignKey("Category", on_delete=models.PROTECT)
     user = models.ForeignKey("Customer", on_delete=models.PROTECT)
+
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{type(self).__name__}({self.reference})"
