@@ -87,12 +87,3 @@ class TransactionBulkCreateSerializer(serializers.Serializer):
         instances = [Transaction(**item) for item in data]
 
         return Transaction.objects.bulk_create(instances)
-
-    # def validate(self, data):
-    #     breakpoint()
-    class Meta:
-        model = Transaction
-        fields = "__all__"
-
-    def to_representation(self, data):
-        return {item for item in data["payload"]}
