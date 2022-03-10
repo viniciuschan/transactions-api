@@ -2,9 +2,10 @@ from django.db.models import F, Q, Sum
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.serializers import ValidationError
 
 from .models import Transaction
-from .serializers import TransactionSerializer
+from .serializers import TransactionBulkCreateSerializer, TransactionSerializer
 
 
 class TransactionViewSet(viewsets.ModelViewSet):
@@ -16,11 +17,31 @@ class TransactionViewSet(viewsets.ModelViewSet):
         data = (
             Transaction.objects.values(user_email=F("user__email"))
             .annotate(
-                total_inflow=Sum(F("amount"), filter=Q(kind="IN")),
+                total_inflow=Sum(
+                    F("amount"),
+                    filter=Q(kind=Transaction.Type.INFLOW),
+                    default=0,
+                ),
             )
             .annotate(
-                total_outflow=Sum(F("amount"), filter=Q(kind="OU")),
+                total_outflow=Sum(
+                    F("amount"),
+                    filter=Q(kind=Transaction.Type.OUTFLOW),
+                    default=0,
+                ),
             )
         )
 
         return Response(data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=["post"], url_path="bulk")
+    def bulk_create_transactions(self, request, *args, **kwargs):
+        if not isinstance(request.data, list):
+            raise ValidationError("Invalid data format")
+
+        data = {"payload": request.data}
+        serializer = TransactionBulkCreateSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(data, status=status.HTTP_201_CREATED)

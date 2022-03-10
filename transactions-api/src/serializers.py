@@ -29,8 +29,21 @@ class TransactionSerializer(serializers.ModelSerializer):
             validate_email(value)
         except DjangoValidationError:
             raise serializers.ValidationError("Invalid e-mail format")
-        else:
-            return value
+        return value
+
+    def _validate_transaction(self, kind, amount):
+        match kind:
+            case Transaction.Type.INFLOW:
+                if amount < 0:
+                    raise serializers.ValidationError("Inflow transactions must have postive amount")
+            case Transaction.Type.OUTFLOW:
+                if amount > 0:
+                    raise serializers.ValidationError("Outflow transactions must have negative amount")
+
+    def validate(self, data):
+        kind, amount = data["kind"], data["amount"]
+        self._validate_transaction(kind, amount)
+        return super().validate(data)
 
     def save(self):
         validated_data = self.validated_data
@@ -56,3 +69,18 @@ class TransactionSerializer(serializers.ModelSerializer):
             "category",
             "user_email",
         )
+
+
+class TransactionBulkCreateSerializer(serializers.Serializer):
+    payload = TransactionSerializer(many=True)
+
+    def create(self, validated_data):
+        data = validated_data["payload"]
+
+        for item in data:
+            item["category"] = get_category_id(item["category"])
+            item["user"] = get_user_id(item["user"])
+
+        instances = [Transaction(**item) for item in data]
+
+        return Transaction.objects.bulk_create(instances)
