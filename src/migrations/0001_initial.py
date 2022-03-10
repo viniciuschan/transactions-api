@@ -34,7 +34,6 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("email", models.EmailField(max_length=30, unique=True)),
-                ("salary", models.DecimalField(decimal_places=2, max_digits=10, null=True)),
             ],
         ),
         migrations.CreateModel(

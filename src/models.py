@@ -38,7 +38,6 @@ class Category(models.Model):
 
 class Customer(models.Model):
     email = models.EmailField(max_length=30, unique=True)
-    salary = models.DecimalField(max_digits=10, decimal_places=2, null=True)
 
     def __str__(self):
         return f"{type(self).__name__}({self.email})"
