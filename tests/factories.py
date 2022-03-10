@@ -21,7 +21,6 @@ class CustomerFactory(DjangoModelFactory):
         django_get_or_create = ("email",)
 
     email = fake.email()
-    salary = "5000.00"
 
 
 class TransactionFactory(DjangoModelFactory):

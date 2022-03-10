@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
-from .factories import CustomerFactory, TransactionFactory
+from .factories import CategoryFactory, CustomerFactory, TransactionFactory
 from src.models import Transaction
 
 client = APIClient()
@@ -193,3 +193,72 @@ def test_bulk_create_transactions_with_invalid_format():
     response = client.post(url, invalid_payload)
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == expected_result
+
+
+def test_get_summary_transactions_by_email_success():
+    customer = CustomerFactory.create(email="dev@test.com")
+    category1 = CategoryFactory.create(name="salary")
+    category2 = CategoryFactory.create(name="savings")
+    category3 = CategoryFactory.create(name="groceries")
+    category4 = CategoryFactory.create(name="rent")
+    category5 = CategoryFactory.create(name="transfer")
+
+    TransactionFactory.create(
+        reference="000100",
+        kind=Transaction.Type.INFLOW,
+        amount="2500.00",
+        user=customer,
+        category=category1,
+    )
+    TransactionFactory.create(
+        reference="000200",
+        kind=Transaction.Type.INFLOW,
+        amount="150.72",
+        user=customer,
+        category=category2,
+    )
+    TransactionFactory.create(
+        reference="000300",
+        kind=Transaction.Type.OUTFLOW,
+        amount="-51.13",
+        user=customer,
+        category=category3,
+    )
+    TransactionFactory.create(
+        reference="000400",
+        kind=Transaction.Type.OUTFLOW,
+        amount="-560.00",
+        user=customer,
+        category=category4,
+    )
+    TransactionFactory.create(
+        reference="000500",
+        kind=Transaction.Type.OUTFLOW,
+        amount="-150.72",
+        user=customer,
+        category=category5,
+    )
+
+    expected_result = {
+        "inflow": {
+            "salary": "2500.00",
+            "savings": "150.72",
+        },
+        "outflow": {
+            "groceries": "-51.13",
+            "rent": "-560.00",
+            "transfer": "-150.72",
+        },
+    }
+    url = reverse("transactions-list") + "summary/?user_email=dev@test.com"
+
+    response = client.get(url)
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == expected_result
+
+
+def test_get_summary_transactions_by_email_user_not_found():
+    url = reverse("transactions-list") + "summary/?user_email=nonexistent@test.com"
+    response = client.get(url)
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {"detail": "Not found."}
