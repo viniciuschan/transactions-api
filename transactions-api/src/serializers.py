@@ -78,9 +78,21 @@ class TransactionBulkCreateSerializer(serializers.Serializer):
         data = validated_data["payload"]
 
         for item in data:
-            item["category"] = get_category_id(item["category"])
-            item["user"] = get_user_id(item["user"])
+            item["category_id"] = get_category_id(item["category"])
+            item["user_id"] = get_user_id(item["user"])
+
+            del item["category"]
+            del item["user"]
 
         instances = [Transaction(**item) for item in data]
 
         return Transaction.objects.bulk_create(instances)
+
+    # def validate(self, data):
+    #     breakpoint()
+    class Meta:
+        model = Transaction
+        fields = "__all__"
+
+    def to_representation(self, data):
+        return {item for item in data["payload"]}

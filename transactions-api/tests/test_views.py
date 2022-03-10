@@ -157,3 +157,39 @@ def test_calculate_total_flow_by_users_transactions():
     response = client.get(url)
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == expected_result
+
+
+def test_bulk_create_transactions_success():
+    payload = [
+        {
+            "reference": "0000001",
+            "date": "2022-03-09",
+            "amount": "100.00",
+            "type": "IN",
+            "user_email": "dev1@email.com",
+            "category": "category_name",
+        },
+        {
+            "reference": "0000002",
+            "date": "2022-03-09",
+            "amount": "-100.00",
+            "type": "OU",
+            "user_email": "dev2@email.com",
+            "category": "another_category_name",
+        },
+    ]
+    url = reverse("transactions-list") + "bulk/"
+
+    response = client.post(url, data=payload, format="json")
+    assert response.status_code == status.HTTP_201_CREATED
+
+
+def test_bulk_create_transactions_with_invalid_format():
+    url = reverse("transactions-list") + "bulk/"
+    invalid_payload = {"key": "value"}
+
+    expected_result = {"invalid_data": "this endpoint only accepts a list of transactions"}
+
+    response = client.post(url, invalid_payload)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == expected_result
