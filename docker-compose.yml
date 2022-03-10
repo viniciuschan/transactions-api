@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  transactions-api:
+    build: .
+    command: bash -c "python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - "8000:8000"
+    depends_on:
+       - db
+    volumes:
+      - .:/app
+    environment:
+      DATABASE_URL: postgres://postgres:supersecret@db:5432/postgres
+
+  db:
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: supersecret

@@ -15,13 +15,16 @@ addopts = "-vv"
 name = "transactions-api"
 version = "0.1.0"
 description = "Rest API to deal with simple transactions"
-authors = ["Vinicius Chan <vinicius.chan@olist.com>"]
+authors = ["Vinicius Chan <vchanbr@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
 django = "==4.0.3"
 djangorestframework = "==3.13.1"
 django-rest-swagger = "*"
+python-decouple = "*"
+psycopg2 = "*"
+dj-database-url = "*"
 
 
 [tool.poetry.dev-dependencies]

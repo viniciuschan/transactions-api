@@ -2,16 +2,18 @@ lint:
 	poetry run pre-commit install && poetry run pre-commit run -a -v
 
 test:
-	poetry run pytest -sx transactions-api
-
-migrate:
-	poetry run python transactions-api/manage.py makemigrations
-	poetry run python transactions-api/manage.py migrate
+	poetry run pytest -sx
 
 run:
-	poetry run python transactions-api/manage.py runserver
+	poetry run python manage.py runserver
 
-create_mocks:
-	poetry run python transactions-api/manage.py loaddata categories.json
-	poetry run python transactions-api/manage.py loaddata customers.json
-	poetry run python transactions-api/manage.py loaddata transactions.json
+migrations:
+	docker-compose exec transactions-api su -c "python manage.py makemigrations"
+
+migrate:
+	docker-compose exec transactions-api su -c "python manage.py migrate"
+
+create_fixtures:
+	docker-compose exec transactions-api su -c "python manage.py loaddata categories.json"
+	docker-compose exec transactions-api su -c "python manage.py loaddata customers.json"
+	docker-compose exec transactions-api su -c "python manage.py loaddata transactions.json"

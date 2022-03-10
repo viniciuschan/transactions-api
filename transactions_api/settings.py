@@ -1,4 +1,8 @@
+import os
 from pathlib import Path
+
+from decouple import config
+from dj_database_url import parse as parse_db_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -60,12 +64,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "transactions_api.wsgi.application"
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
+IN_MEMORY_DATABASE_URL = "sqlite:///" + os.path.join(BASE_DIR, "db.sqlite3")
+DATABASES = {"default": config("DATABASE_URL", default=IN_MEMORY_DATABASE_URL, cast=parse_db_url)}
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -81,7 +81,6 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
