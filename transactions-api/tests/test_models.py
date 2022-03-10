@@ -1,9 +1,5 @@
-import pytest
-
 from .factories import CategoryFactory, CustomerFactory
 from src.models import Category, Customer, Transaction
-
-pytestmark = pytest.mark.django_db
 
 
 def test_create_transaction():
@@ -14,7 +10,7 @@ def test_create_transaction():
         reference="000001",
         date="2022-03-08",
         amount="500.00",
-        kind="IN",
+        kind=Transaction.Type.INFLOW,
         user=customer,
         category=category,
     )

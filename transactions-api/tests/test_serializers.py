@@ -48,10 +48,6 @@ def test_get_category_id(category_name, categories_count):
 
 
 def test_transaction_serializer_success(transaction_payload):
-    Transaction.objects.count() == 0
-    Category.objects.count() == 0
-    Customer.objects.count() == 0
-
     serializer = TransactionSerializer(data=transaction_payload)
     serializer.is_valid(raise_exception=True) is True
     serializer.save()
@@ -70,9 +66,9 @@ def test_transaction_serializer_invalid_email(transaction_payload):
     with pytest.raises(serializers.ValidationError):
         serializer.is_valid(raise_exception=True)
 
-    Category.objects.count() == 0
-    Customer.objects.count() == 0
-    Transaction.objects.count() == 0
+    assert Category.objects.exists() is False
+    assert Customer.objects.exists() is False
+    assert Transaction.objects.exists() is False
 
 
 @pytest.mark.parametrize(
@@ -100,6 +96,6 @@ def test_transaction_serializer_invalid_transaction_amount(
     with pytest.raises(serializers.ValidationError):
         serializer.is_valid(raise_exception=True)
 
-    Category.objects.count() == 0
-    Customer.objects.count() == 0
-    Transaction.objects.count() == 0
+    assert Category.objects.exists() is False
+    assert Customer.objects.exists() is False
+    assert Transaction.objects.exists() is False

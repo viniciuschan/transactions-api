@@ -1,21 +1,26 @@
 import factory
 from factory.django import DjangoModelFactory
+from faker import Faker
 
 from src.models import Category, Customer, Transaction
+
+fake = Faker()
 
 
 class CategoryFactory(DjangoModelFactory):
     class Meta:
         model = Category
+        django_get_or_create = ("name",)
 
-    name = "Belvo"
+    name = fake.slug()
 
 
 class CustomerFactory(DjangoModelFactory):
     class Meta:
         model = Customer
+        django_get_or_create = ("email",)
 
-    email = "dev@test.com"
+    email = fake.email()
     salary = "5000.00"
 
 
@@ -27,9 +32,9 @@ class TransactionFactory(DjangoModelFactory):
         profile = factory.SubFactory(CustomerFactory)
         categ = factory.SubFactory(CategoryFactory)
 
-    reference = ("000001",)
+    reference = fake.numerify()
     date = "2022-03-08"
     amount = "500.00"
-    kind = ("IN",)
+    kind = Transaction.Type.INFLOW
     category = factory.SelfAttribute("categ")
     user = factory.SelfAttribute("profile")
