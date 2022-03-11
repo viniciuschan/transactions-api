@@ -5,7 +5,7 @@
 ##### API Rest to deal with financial transactions
 ###### Author: Vinícius Chan
 
-#### Before getting started, we must install some dependencies:
+#### Required dependencies
 
 | Dependency | Download Link |
 | ------ | ------ |
@@ -19,35 +19,39 @@ I prepared an easy way to run this project locally:
 
 1. Clone this repository:
 ```
-$ git clone git@github.com:viniciuschan/transactions-api.git
+git clone git@github.com:viniciuschan/transactions-api.git
 ```
-2. In the project root directory, there are some useful Makefile commands:
+
+2. In the project root directory, there are some useful Makefile commands.
+
+3. You can check all test cases by running:
+```
+make test
+```
+
+4. To start the service using docker-compose run the following command:
 ```
 make run
 ```
-3. As soon as your containers are up, you must migrate the data structure:
+
+5. As soon as your containers are up, you must migrate the data structure:
 ```
-$ make migrate
+make migrate
 ```
-4. I prepared a fixture file to load initial items for testing purposes:
+
+6. I prepared a fixture file to load initial items for testing purposes:
 ```
-$ make loaddata
-```
-5. Finally, you can check all test cases by running the following command:
-```
-$ make test
+make create_fixtures
 ```
 
 
 =============
 
 
-# About project: How it works
+# About the project: How it works
 ## Manipulating transactions
 #### POST
-
 Endpoint: **/v1/transactions/**
-
 Body contract:
 ```
 {
@@ -62,7 +66,6 @@ Body contract:
 
 #### UPDATE
 Endpoint: **/v1/transactions/1/**
-
 Body contract:
 ```
 {
@@ -77,7 +80,6 @@ Body contract:
 
 #### LIST
 Endpoint: **/v1/transactions/**
-
 Response:
 ```
 [
@@ -104,7 +106,6 @@ Response:
 
 #### GET
 Endpoint: **http://localhost:80001/v1/transactions/<uuid>/**
-
 Response:
 ```
 {
@@ -120,7 +121,6 @@ Response:
 
 #### BULK CREATE
 Endpoint: **/v1/transactions/bulk/**
-
 Body contract:
 ```
 [
@@ -181,6 +181,5 @@ Response content:
     }
 }
 ```
-
 
 =============
