@@ -25,7 +25,8 @@ django-rest-swagger = "*"
 python-decouple = "*"
 psycopg2 = "*"
 dj-database-url = "*"
-
+gunicorn = "*"
+django-heroku = "*"
 
 [tool.poetry.dev-dependencies]
 ipython = "*"

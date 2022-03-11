@@ -4,15 +4,16 @@ from pathlib import Path
 from decouple import config
 from dj_database_url import parse as parse_db_url
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = "django-insecure-!er9pb#owst_j9leytvf9g#m5j^l&6vgl@zt$e%77w@9938zu1"
+SECRET_KEY = config("SECRET_KEY", default="super-secret")  # default value only for testing
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config("DEBUG", default=False, cast=bool)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -38,7 +39,6 @@ REST_FRAMEWORK = {
         "user": "1000/day",
     },
 }
-
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -73,7 +73,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "transactions_api.wsgi.application"
 
+# run tests in memmory locally, instead of creating a database
 IN_MEMORY_DATABASE_URL = "sqlite:///" + os.path.join(BASE_DIR, "db.sqlite3")
+
 DATABASES = {"default": config("DATABASE_URL", default=IN_MEMORY_DATABASE_URL, cast=parse_db_url)}
 
 AUTH_PASSWORD_VALIDATORS = [
