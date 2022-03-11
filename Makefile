@@ -18,5 +18,5 @@ create_fixtures:
 shell:
 	docker-compose exec transactions-api su -c "pip install ipython && python manage.py shell"
 
-run: migrate
+run:
 	docker-compose up -d
