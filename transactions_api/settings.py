@@ -29,6 +29,9 @@ INSTALLED_APPS = [
     "src",
 ]
 
+THROTTLING_ANON_USER_LIMIT = config("THROTTLING_ANON_USER_LIMIT", default="500")
+THROTTLING_USER_LIMIT = config("THROTTLING_USER_LIMIT", default="1000")
+
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.coreapi.AutoSchema",
     # throttling validations
@@ -37,8 +40,8 @@ REST_FRAMEWORK = {
         "rest_framework.throttling.UserRateThrottle",
     ),
     "DEFAULT_THROTTLE_RATES": {
-        "anon": "500/day",
-        "user": "1000/day",
+        "anon": f"{THROTTLING_ANON_USER_LIMIT}/day",
+        "user": f"{THROTTLING_USER_LIMIT}/day",
     },
 }
 

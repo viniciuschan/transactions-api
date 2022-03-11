@@ -10,8 +10,6 @@ services:
        - db
     volumes:
       - .:/app
-    environment:
-      DATABASE_URL: postgres://postgres:supersecret@db:5432/postgres
 
   db:
     image: postgres:14.2
