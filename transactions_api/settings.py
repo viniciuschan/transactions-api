@@ -14,6 +14,7 @@ DEBUG = config("DEBUG", default=False, cast=bool)
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
+    "belvo-transactions-api.herokuapp.com",
 ]
 
 INSTALLED_APPS = [
@@ -111,4 +112,4 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 # heroku
-django_heroku.settings(locals())
+django_heroku.settings(locals(), databases=False)
