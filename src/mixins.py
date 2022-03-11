@@ -7,7 +7,7 @@ from .managers import SoftDeleteManager
 class SoftDeleteModelMixin(models.Model):
     """Mixin model for soft delete."""
 
-    deleted_at = models.DateTimeField(blank=True, null=True)
+    deleted_at = models.DateTimeField(null=True)
 
     objects = SoftDeleteManager()
 
