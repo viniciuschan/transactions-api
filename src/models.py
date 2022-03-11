@@ -4,8 +4,10 @@ from decimal import Decimal
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from .mixins import SoftDeleteModelMixin
 
-class Transaction(models.Model):
+
+class Transaction(SoftDeleteModelMixin):
     class Type(models.TextChoices):
         INFLOW = "IN", _("Inflow")
         OUTFLOW = "OU", _("Outflow")
