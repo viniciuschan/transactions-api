@@ -51,7 +51,9 @@ make create_fixtures
 # About the project: How it works
 ## Manipulating transactions
 #### POST
+
 Endpoint: **/v1/transactions/**
+
 Body contract:
 ```
 {
@@ -65,7 +67,9 @@ Body contract:
 ```
 
 #### UPDATE
+
 Endpoint: **/v1/transactions/1/**
+
 Body contract:
 ```
 {
@@ -79,7 +83,9 @@ Body contract:
 ```
 
 #### LIST
+
 Endpoint: **/v1/transactions/**
+
 Response:
 ```
 [
@@ -105,7 +111,9 @@ Response:
 ```
 
 #### GET
+
 Endpoint: **http://localhost:80001/v1/transactions/<uuid>/**
+
 Response:
 ```
 {
@@ -120,7 +128,9 @@ Response:
 ```
 
 #### BULK CREATE
+
 Endpoint: **/v1/transactions/bulk/**
+
 Body contract:
 ```
 [
@@ -144,7 +154,9 @@ Body contract:
 ```
 
 ## How to consult total flow per user
+
 Method: GET
+
 Endpoint: **/v1/transactions/group-by-user/**
 
 Response content:
@@ -164,7 +176,9 @@ Response content:
 ```
 
 ## How to consult a summary of transactions by user and categories
+
 Method: GET
+
 Endpoint: **/v1/transactions/summary/?user_email=dev@test.com**
 
 Response content:
