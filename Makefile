@@ -20,3 +20,24 @@ shell:
 
 run:
 	docker-compose up -d
+
+
+
+
+
+
+# Heroku development commands
+logs:
+	heroku logs --app belvo-transactions-api --tail
+
+prod_shell:
+	heroku run --app belvo-transactions-api "pip install ipython && python manage.py shell"
+
+deploy:
+	git push heroku main
+
+get-env:
+	heroku config:get $(ENV)
+
+set-env:
+	heroku config:set $(ENV)=$(VALUE)
