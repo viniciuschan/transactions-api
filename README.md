@@ -1,5 +1,8 @@
 [![CircleCI](https://circleci.com/gh/viniciuschan/transactions-api/tree/main.svg?style=svg&circle-token=d1bb25356a754041bf1e1c454930ebdb89d94134)](https://circleci.com/gh/viniciuschan/transactions-api/tree/main)
 
+Swagger Docs: https://belvo-transactions-api.herokuapp.com/
+Heroku URL: https://belvo-transactions-api.herokuapp.com/v1/
+
 # Transactions API
 =============
 ##### API Rest to deal with financial transactions
@@ -49,6 +52,7 @@ make create_fixtures
 
 
 # About the project: How it works
+
 ## Manipulating transactions
 #### POST
 
@@ -68,7 +72,7 @@ Body contract:
 
 #### UPDATE
 
-Endpoint: **/v1/transactions/1/**
+Endpoint: **/v1/transactions/<uuid>/**
 
 Body contract:
 ```
@@ -112,7 +116,7 @@ Response:
 
 #### GET
 
-Endpoint: **http://localhost:80001/v1/transactions/<uuid>/**
+Endpoint: **/v1/transactions/<uuid>/**
 
 Response:
 ```
