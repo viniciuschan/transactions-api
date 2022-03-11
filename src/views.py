@@ -30,7 +30,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.validated_data, status=status.HTTP_201_CREATED)
 
-    @action(detail=False, methods=["get"], url_path="total")
+    @action(detail=False, methods=["get"], url_path="group-by-user")
     def calculate_total_flow_by_user(self, request, *args, **kwargs):
         data = (
             Transaction.objects.values(user_email=F("user__email"))

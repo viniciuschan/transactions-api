@@ -139,7 +139,7 @@ def test_calculate_total_flow_by_users_transactions():
         amount="-1000.00",
         user_id=customer2.id,
     )
-    url = reverse("transactions-list") + "total/"
+    url = reverse("transactions-list") + "group-by-user/"
 
     expected_result = [
         {
