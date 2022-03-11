@@ -1,0 +1,35 @@
+version: 2
+
+jobs:
+  build:
+    working_directory: ~/repo
+    docker:
+      - image: cimg/python:3.10.1
+        environment:
+          PIPENV_VENV_IN_PROJECT: true
+          DATABASE_URL: postgresql://root@localhost:5432/circle_test?sslmode=disable
+      - image: cimg/postgres:14.0
+        environment:
+          POSTGRES_USER: root
+          POSTGRES_DB: circle_test
+
+    steps:
+      - checkout
+
+      - run:
+          name: "Install project dependencies"
+          command: |
+            curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python3
+            poetry install
+
+      - run:
+          name: "Run linters"
+          command: poetry run pre-commit run -a -v
+
+      - run:
+          name: "Run tests"
+          command: poetry run pytest -vv -sx
+
+branches:
+  only:
+    - main
