@@ -5,8 +5,6 @@ import django_heroku
 from decouple import config
 from dj_database_url import parse as parse_db_url
 
-django_heroku.settings(locals())
-
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config("SECRET_KEY", default="super-secret")  # default value only for testing
@@ -110,3 +108,7 @@ USE_TZ = True
 STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+# heroku
+django_heroku.settings(locals())
