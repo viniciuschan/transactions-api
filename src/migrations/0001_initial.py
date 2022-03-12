@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                         auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                ("name", models.CharField(max_length=50, unique=True)),
+                ("name", models.CharField(max_length=30, unique=True)),
             ],
         ),
         migrations.CreateModel(
@@ -39,6 +39,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="Transaction",
             fields=[
+                ("deleted_at", models.DateTimeField(null=True)),
                 (
                     "id",
                     models.UUIDField(
@@ -48,7 +49,10 @@ class Migration(migrations.Migration):
                 ("reference", models.CharField(max_length=20, unique=True)),
                 ("date", models.DateField()),
                 ("amount", models.DecimalField(decimal_places=2, default=Decimal("0"), max_digits=10)),
-                ("kind", models.CharField(choices=[("IN", "Inflow"), ("OU", "Outflow")], max_length=2)),
+                (
+                    "type",
+                    models.CharField(choices=[("inflow", "Inflow"), ("outflow", "Outflow")], max_length=7),
+                ),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 (
                     "category",
@@ -56,5 +60,8 @@ class Migration(migrations.Migration):
                 ),
                 ("user", models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to="src.customer")),
             ],
+            options={
+                "abstract": False,
+            },
         ),
     ]

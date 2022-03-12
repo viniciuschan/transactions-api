@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 import pytest
 
 from .factories import CategoryFactory, CustomerFactory, TransactionFactory
@@ -11,8 +13,8 @@ def test_create_transaction():
     transaction = Transaction.objects.create(
         reference="000001",
         date="2022-03-08",
-        amount="500.00",
-        kind=Transaction.Type.INFLOW,
+        amount=Decimal("500.00"),
+        type=Transaction.INFLOW,
         user=customer,
         category=category,
     )

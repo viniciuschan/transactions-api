@@ -2,15 +2,19 @@ import uuid
 from decimal import Decimal
 
 from django.db import models
-from django.utils.translation import gettext_lazy as _
+from model_utils import Choices
 
 from .mixins import SoftDeleteModelMixin
 
 
 class Transaction(SoftDeleteModelMixin):
-    class Type(models.TextChoices):
-        INFLOW = "IN", _("Inflow")
-        OUTFLOW = "OU", _("Outflow")
+    INFLOW = "inflow"
+    OUTFLOW = "outflow"
+
+    Types = Choices(
+        (INFLOW, "Inflow"),
+        (OUTFLOW, "Outflow"),
+    )
 
     id = models.UUIDField(
         primary_key=True,
@@ -21,7 +25,7 @@ class Transaction(SoftDeleteModelMixin):
     reference = models.CharField(max_length=20, unique=True)
     date = models.DateField()
     amount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal())
-    kind = models.CharField(max_length=2, choices=Type.choices)
+    type = models.CharField(max_length=7, choices=Types)
     category = models.ForeignKey("Category", on_delete=models.PROTECT)
     user = models.ForeignKey("Customer", on_delete=models.PROTECT)
 
@@ -32,7 +36,7 @@ class Transaction(SoftDeleteModelMixin):
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=30, unique=True)
 
     def __str__(self):
         return f"{type(self).__name__}({self.name})"
