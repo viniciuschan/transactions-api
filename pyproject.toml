@@ -27,6 +27,7 @@ psycopg2 = "*"
 dj-database-url = "*"
 gunicorn = "*"
 django-heroku = "*"
+django-model-utils = "*"
 
 [tool.poetry.dev-dependencies]
 ipython = "*"
