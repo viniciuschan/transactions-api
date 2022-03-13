@@ -1,7 +1,8 @@
 [![CircleCI](https://circleci.com/gh/viniciuschan/transactions-api/tree/main.svg?style=svg&circle-token=d1bb25356a754041bf1e1c454930ebdb89d94134)](https://circleci.com/gh/viniciuschan/transactions-api/tree/main)
 
 Swagger Docs: https://belvo-transactions-api.herokuapp.com/
-Heroku URL: https://belvo-transactions-api.herokuapp.com/v1/
+
+Heroku app URL: https://belvo-transactions-api.herokuapp.com/v1/
 
 # Transactions API
 =============
@@ -64,7 +65,7 @@ Body contract:
     "reference": "0000000000001",
     "date": "2022-03-01",
     "amount": "1000.00",
-    "type": "IN",
+    "type": "inflow",
     "category": "category_name",
     "user_email": "dev@example.com",
 }
@@ -80,7 +81,7 @@ Body contract:
     "reference": "0000000000001",
     "date": "2020-03-01",
     "amount": "5000.00",
-    "type": "IN",
+    "type": "inflow",
     "category": "category_name",
     "user_email": "dev@example.com",
 }
@@ -98,7 +99,7 @@ Response:
         "reference": "00001",
         "date": "2022-03-01",
         "amount": "1000.00",
-        "type": "IN",
+        "type": "inflow",
         "category": "category1",
         "user_email": "dev1@test.com"
     },
@@ -107,7 +108,7 @@ Response:
         "reference": "00002",
         "date": "2022-02-10",
         "amount": "-100.00",
-        "type": "OU",
+        "type": "outflow",
         "category": "category1",
         "user_email": "dev1@test.com"
     }
@@ -125,7 +126,7 @@ Response:
     "reference": "00001",
     "date": "2022-03-01",
     "amount": "1000.00",
-    "type": "IN",
+    "type": "inflow",
     "category": "category1",
     "user_email": "dev1@test.com"
 }
@@ -142,7 +143,7 @@ Body contract:
         "reference": "123",
         "date": "2020-01-03",
         "amount": "100.00",
-        "type": "IN",
+        "type": "inflow",
         "category": "dev1",
         "user_email": "dev1@test.com"
     },
@@ -150,7 +151,7 @@ Body contract:
         "reference": "321",
         "date": "2020-03-10",
         "amount": "100.00",
-        "type": "OU",
+        "type": "outflow",
         "category": "dev1",
         "user_email": "dev1@test.com"
     }

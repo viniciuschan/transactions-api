@@ -19,14 +19,9 @@ shell:
 	docker-compose exec transactions-api su -c "pip install ipython && python manage.py shell"
 
 run:
-	docker-compose up -d
+	docker-compose up
 
-
-
-
-
-
-# Heroku development commands
+# Heroku development shortcuts
 logs:
 	heroku logs --app belvo-transactions-api --tail
 
@@ -34,7 +29,10 @@ prod_shell:
 	heroku run --app belvo-transactions-api "pip install ipython && python manage.py shell"
 
 deploy:
+	poetry export -f requirements.txt -o requirements.txt --without-hashes
 	git push heroku main
+	rm requirements.txt
+	echo "deployed with success!"
 
 get-env:
 	heroku config:get $(ENV)
