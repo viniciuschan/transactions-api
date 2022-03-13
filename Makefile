@@ -29,9 +29,7 @@ prod_shell:
 	heroku run --app belvo-transactions-api "pip install ipython && python manage.py shell"
 
 deploy:
-	poetry export -f requirements.txt -o requirements.txt --without-hashes
-	git push heroku main:main
-	rm requirements.txt
+	git push heroku main
 	echo "deployed with success!"
 
 get-env:
