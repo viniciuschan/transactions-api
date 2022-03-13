@@ -1,8 +1,6 @@
 [![CircleCI](https://circleci.com/gh/viniciuschan/transactions-api/tree/main.svg?style=svg&circle-token=d1bb25356a754041bf1e1c454930ebdb89d94134)](https://circleci.com/gh/viniciuschan/transactions-api/tree/main)
 
-Swagger Docs: https://belvo-transactions-api.herokuapp.com/
-
-Heroku app URL: https://belvo-transactions-api.herokuapp.com/v1/
+Check my APP: https://belvo-transactions-api.herokuapp.com/
 
 # Transactions API
 =============

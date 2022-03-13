@@ -60,7 +60,7 @@ ROOT_URLCONF = "transactions_api.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [os.path.join(BASE_DIR, "templates")],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -114,7 +114,6 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 BULK_CREATE_MAX_SIZE = config("BULK_CREATE_MAX_BATCH_SIZE", default=100)
-
 
 # heroku
 django_heroku.settings(locals(), databases=False)
