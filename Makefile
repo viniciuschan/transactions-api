@@ -30,7 +30,7 @@ prod_shell:
 
 deploy:
 	poetry export -f requirements.txt -o requirements.txt --without-hashes
-	git push heroku main
+	git push heroku main:main
 	rm requirements.txt
 	echo "deployed with success!"
 
@@ -39,3 +39,6 @@ get-env:
 
 set-env:
 	heroku config:set $(ENV)=$(VALUE)
+
+heroku-migrate:
+	heroku run python manage.py migrate
