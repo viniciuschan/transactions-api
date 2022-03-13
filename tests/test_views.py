@@ -30,11 +30,11 @@ def test_post_transaction_invalid_email(transaction_payload):
 
     response = client.post(url, payload)
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json() == {"user_email": ["Invalid e-mail format"]}
+    assert response.json() == {"user_email": ["Enter a valid email address."]}
     assert Transaction.objects.exists() is False
 
 
-def test_put_transaction_success(transaction_payload):
+def test_put_transaction_not_allowed(transaction_payload):
     transaction = TransactionFactory.create()
 
     payload = transaction_payload
@@ -42,38 +42,16 @@ def test_put_transaction_success(transaction_payload):
     url = reverse("transactions-detail", args=[transaction.id])
 
     response = client.put(url, payload)
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json() == payload
-
-    transaction.refresh_from_db()
-    assert transaction.reference == payload["reference"]
-    assert transaction.date.isoformat() == payload["date"]
-    assert transaction.amount == Decimal(payload["amount"])
-    assert transaction.kind == payload["type"]
-    assert transaction.user.email == payload["user_email"]
-    assert transaction.category.name == payload["category"]
+    assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
 
-def test_put_transaction_invalid_email(transaction_payload):
-    transaction = TransactionFactory.create()
-
-    payload = transaction_payload
-    payload["id"] = str(transaction.id)
-    payload["user_email"] = "invalid-email"
-    url = reverse("transactions-detail", args=[transaction.id])
-
-    response = client.put(url, payload)
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json() == {"user_email": ["Invalid e-mail format"]}
-
-
-def test_patch_transaction_success():
+def test_patch_transaction_not_allowed():
     transaction = TransactionFactory.create()
 
     payload = {
         "reference": "99995",
         "amount": Decimal("-12345.00"),
-        "type": Transaction.Type.OUTFLOW,
+        "type": Transaction.OUTFLOW,
         "user_email": "another@email.com",
         "category": "another-category",
     }
@@ -81,14 +59,7 @@ def test_patch_transaction_success():
     url = reverse("transactions-detail", args=[transaction.id])
 
     response = client.patch(url, payload)
-    assert response.status_code == status.HTTP_200_OK
-
-    transaction.refresh_from_db()
-    assert transaction.reference == payload["reference"]
-    assert transaction.kind == payload["type"]
-    assert transaction.user.email == payload["user_email"]
-    assert transaction.category.name == payload["category"]
-    assert transaction.amount == payload["amount"]
+    assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
 
 def test_delete_transaction():
@@ -123,20 +94,20 @@ def test_calculate_total_flow_by_users_transactions():
 
     TransactionFactory.create(
         reference="000100",
-        kind=Transaction.Type.INFLOW,
-        amount="100.00",
+        type=Transaction.INFLOW,
+        amount=Decimal("100.00"),
         user_id=customer1.id,
     )
     TransactionFactory.create(
         reference="000200",
-        kind=Transaction.Type.OUTFLOW,
-        amount="-100.00",
+        type=Transaction.OUTFLOW,
+        amount=Decimal("-100.00"),
         user_id=customer1.id,
     )
     TransactionFactory.create(
         reference="000300",
-        kind=Transaction.Type.OUTFLOW,
-        amount="-1000.00",
+        type=Transaction.OUTFLOW,
+        amount=Decimal("-1000.00"),
         user_id=customer2.id,
     )
     url = reverse("transactions-list") + "group-by-user/"
@@ -165,7 +136,7 @@ def test_bulk_create_transactions_success():
             "reference": "0000001",
             "date": "2022-03-09",
             "amount": "100.00",
-            "type": "IN",
+            "type": "inflow",
             "user_email": "dev1@email.com",
             "category": "category_name",
         },
@@ -173,7 +144,7 @@ def test_bulk_create_transactions_success():
             "reference": "0000002",
             "date": "2022-03-09",
             "amount": "-100.00",
-            "type": "OU",
+            "type": "outflow",
             "user_email": "dev2@email.com",
             "category": "another_category_name",
         },
@@ -184,11 +155,55 @@ def test_bulk_create_transactions_success():
     assert response.status_code == status.HTTP_201_CREATED
 
 
+def test_bulk_create_transactions_with_duplicated_items():
+    TransactionFactory.create(
+        reference="0000001",
+        amount="0.00",
+    )
+    payload = [
+        {
+            "reference": "0000001",
+            "date": "2022-03-09",
+            "amount": "100.00",
+            "type": "inflow",
+            "user_email": "dev1@email.com",
+            "category": "category_name",
+        },
+        {
+            "reference": "0000002",
+            "date": "2022-03-09",
+            "amount": "-200.00",
+            "type": "outflow",
+            "user_email": "dev1@email.com",
+            "category": "category_name",
+        },
+        {
+            "reference": "0000002",
+            "date": "2022-03-09",
+            "amount": "300.00",
+            "type": "inflow",
+            "user_email": "dev2@email.com",
+            "category": "another_category_name",
+        },
+    ]
+    url = reverse("transactions-list") + "bulk/"
+
+    response = client.post(url, data=payload, format="json")
+    assert response.status_code == status.HTTP_201_CREATED
+
+    assert Transaction.objects.count() == 2
+    transaction1 = Transaction.objects.get(reference=payload[0]["reference"])
+    assert transaction1.amount == Decimal("0.00")
+
+    transaction2 = Transaction.objects.get(reference=payload[1]["reference"])
+    assert transaction2.amount == Decimal("-200.00")
+
+
 def test_bulk_create_transactions_with_invalid_format():
     url = reverse("transactions-list") + "bulk/"
     invalid_payload = {"key": "value"}
 
-    expected_result = {"invalid_data": "this endpoint only accepts a list of transactions"}
+    expected_result = {"invalid_data": "This endpoint only accepts a list of transactions."}
 
     response = client.post(url, invalid_payload)
     assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -205,36 +220,36 @@ def test_get_summary_transactions_by_email_success():
 
     TransactionFactory.create(
         reference="000100",
-        kind=Transaction.Type.INFLOW,
-        amount="2500.00",
+        type=Transaction.INFLOW,
+        amount=Decimal("2500.00"),
         user=customer,
         category=category1,
     )
     TransactionFactory.create(
         reference="000200",
-        kind=Transaction.Type.INFLOW,
-        amount="150.72",
+        type=Transaction.INFLOW,
+        amount=Decimal("150.72"),
         user=customer,
         category=category2,
     )
     TransactionFactory.create(
         reference="000300",
-        kind=Transaction.Type.OUTFLOW,
-        amount="-51.13",
+        type=Transaction.OUTFLOW,
+        amount=Decimal("-51.13"),
         user=customer,
         category=category3,
     )
     TransactionFactory.create(
         reference="000400",
-        kind=Transaction.Type.OUTFLOW,
-        amount="-560.00",
+        type=Transaction.OUTFLOW,
+        amount=Decimal("-560.00"),
         user=customer,
         category=category4,
     )
     TransactionFactory.create(
         reference="000500",
-        kind=Transaction.Type.OUTFLOW,
-        amount="-150.72",
+        type=Transaction.OUTFLOW,
+        amount=Decimal("-150.72"),
         user=customer,
         category=category5,
     )

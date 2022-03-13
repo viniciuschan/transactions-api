@@ -5,6 +5,7 @@ from django.db.models import Case, F, Q, Sum, Value, When
 from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.response import Response
 
 from .models import Customer, Transaction
@@ -15,11 +16,14 @@ class TransactionViewSet(viewsets.ModelViewSet):
     queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer
 
+    def update(self, request, *args, **kwargs):
+        raise MethodNotAllowed(request.method)
+
     @action(detail=False, methods=["post"], url_path="bulk")
     def bulk_create_transactions(self, request, *args, **kwargs):
         if not isinstance(request.data, list):
             return Response(
-                {"invalid_data": "this endpoint only accepts a list of transactions"},
+                {"invalid_data": "This endpoint only accepts a list of transactions."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -37,14 +41,14 @@ class TransactionViewSet(viewsets.ModelViewSet):
             .annotate(
                 total_inflow=Sum(
                     F("amount"),
-                    filter=Q(kind=Transaction.Type.INFLOW),
+                    filter=Q(type=Transaction.INFLOW),
                     default=0,
                 ),
             )
             .annotate(
                 total_outflow=Sum(
                     F("amount"),
-                    filter=Q(kind=Transaction.Type.OUTFLOW),
+                    filter=Q(type=Transaction.OUTFLOW),
                     default=0,
                 ),
             )
@@ -63,15 +67,21 @@ class TransactionViewSet(viewsets.ModelViewSet):
             .values("amount", category_name=F("category__name"))
             .annotate(
                 kind=Case(
-                    When(kind=Transaction.Type.INFLOW, then=Value("inflow")),
-                    When(kind=Transaction.Type.OUTFLOW, then=Value("outflow")),
+                    When(type=Transaction.INFLOW, then=Value("inflow")),
+                    When(type=Transaction.OUTFLOW, then=Value("outflow")),
                 )
             )
         )
 
-        data = {}
+        data = {
+            "inflow": {},
+            "outflow": {},
+        }
+
         for key, group in itertools.groupby(transactions, key=itemgetter("kind")):
             categories = list(group)
-            data[key] = {item["category_name"]: str(item["amount"]) for item in categories}
+
+            for item in categories:
+                data[key].setdefault(item["category_name"], str(item["amount"]))
 
         return Response(data, status.HTTP_200_OK)
