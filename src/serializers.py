@@ -1,6 +1,7 @@
 from django.conf import settings
 from rest_framework import serializers
 
+from . import logger
 from .models import Category, Customer, Transaction
 
 
@@ -27,6 +28,7 @@ class TransactionSerializer(serializers.ModelSerializer):
             self.instance
             and Transaction.objects.exclude(id=self.instance.id).filter(reference=value).exists()
         ):
+            logger.warning(f"Reference={value} already exists.")
             raise serializers.ValidationError("Invalid reference")
         return value
 
@@ -35,18 +37,20 @@ class TransactionSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Invalid transaction type.")
         return value
 
-    def _validate_transaction(self, transaction_type, amount):
+    def _validate_transaction(self, transaction_type, amount, reference):
         match transaction_type:
             case Transaction.INFLOW:
                 if amount < 0:
+                    logger.warning(f"The transaction amount from reference={reference} must be positive.")
                     raise serializers.ValidationError("Inflow transactions must have postive amount.")
             case Transaction.OUTFLOW:
                 if amount > 0:
+                    logger.warning(f"The transaction amount from reference={reference} must be negative.")
                     raise serializers.ValidationError("Outflow transactions must have negative amount.")
 
     def validate(self, data):
-        transaction_type, amount = data["type"], data["amount"]
-        self._validate_transaction(transaction_type, amount)
+        transaction_type, amount, reference = data["type"], data["amount"], data["reference"]
+        self._validate_transaction(transaction_type, amount, reference)
         return super().validate(data)
 
     def save(self, **kwargs):
@@ -83,7 +87,9 @@ class TransactionBulkCreateSerializer(serializers.Serializer):
 
         instances = []
         for item in data:
-            if Transaction.objects.filter(reference=item["reference"]).exists():
+            reference = item["reference"]
+            if Transaction.objects.filter(reference=reference).exists():
+                logger.warning(f"Transaction reference={reference} already exists.")
                 continue
 
             category_id = get_category_id(item["category"])

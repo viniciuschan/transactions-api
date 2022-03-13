@@ -21,6 +21,7 @@ shell:
 run:
 	docker-compose up
 
+
 # Heroku development shortcuts
 logs:
 	heroku logs --app belvo-transactions-api --tail
@@ -30,7 +31,7 @@ prod_shell:
 
 deploy:
 	git push heroku main
-	echo "deployed with success!"
+	@echo "Application deployed with success!"
 
 get-env:
 	heroku config:get $(ENV)

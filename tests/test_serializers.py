@@ -1,7 +1,7 @@
 import pytest
 from rest_framework import serializers
 
-from .factories import CategoryFactory, CustomerFactory
+from .factories import CategoryFactory, CustomerFactory, TransactionFactory
 from src.models import Category, Customer, Transaction
 from src.serializers import (
     TransactionBulkCreateSerializer,
@@ -64,7 +64,7 @@ def test_transaction_serializer_invalid_email(transaction_payload):
     payload = transaction_payload
     payload["user_email"] = "invalid-email"
 
-    serializer = TransactionSerializer(data=transaction_payload)
+    serializer = TransactionSerializer(data=payload)
 
     with pytest.raises(serializers.ValidationError):
         serializer.is_valid(raise_exception=True)
@@ -75,34 +75,64 @@ def test_validate_transaction_type(transaction_payload):
     payload = transaction_payload
     payload["type"] = "asd"
 
-    serializer = TransactionSerializer(data=transaction_payload)
+    serializer = TransactionSerializer(data=payload)
 
     with pytest.raises(serializers.ValidationError):
         serializer.is_valid(raise_exception=True)
     assert "type" in serializer.errors.keys()
 
 
+def test_bulk_create_serializer_if_transaction_already_exists(caplog):
+    transaction = TransactionFactory.create(reference="0000001")
+
+    test_data = {
+        "payload": [
+            {
+                "reference": "0000001",
+                "date": "2022-03-09",
+                "amount": "100.00",
+                "type": "inflow",
+                "user_email": "dev1@email.com",
+                "category": "category_name",
+            },
+        ]
+    }
+
+    serializer = TransactionBulkCreateSerializer(data=test_data)
+    assert serializer.is_valid() is True
+    serializer.save()
+
+    expected_log = f"Transaction reference={transaction.reference} already exists."
+    assert expected_log in caplog.messages
+
+
 @pytest.mark.parametrize(
-    "transaction_type, transaction_amount",
+    "transaction_type, transaction_amount, expected_log_value",
     [
-        ("inflow", "-100.00"),
-        ("outflow", "100.00"),
+        ("inflow", "-100.00", "positive"),
+        ("outflow", "100.00", "negative"),
     ],
 )
-def test_transaction_serializer_invalid_transaction_amount(
+def test_transaction_bulk_create_serializer_with_invalid_transaction_amount(
     transaction_type,
     transaction_amount,
+    expected_log_value,
     transaction_payload,
+    caplog,
 ):
-    data = {
+    test_data = {
         "payload": [
             transaction_payload,
         ],
     }
-    data["payload"][0]["type"] = transaction_type
-    data["payload"][0]["amount"] = transaction_amount
+    test_data["payload"][0]["type"] = transaction_type
+    test_data["payload"][0]["amount"] = transaction_amount
 
-    serializer = TransactionBulkCreateSerializer(data=data)
+    serializer = TransactionBulkCreateSerializer(data=test_data)
 
     with pytest.raises(serializers.ValidationError):
         serializer.is_valid(raise_exception=True)
+
+    ref = test_data["payload"][0]["reference"]
+    expected_log = f"The transaction amount from reference={ref} must be {expected_log_value}."
+    assert expected_log in caplog.messages
