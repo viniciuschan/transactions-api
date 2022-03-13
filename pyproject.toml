@@ -28,6 +28,7 @@ dj-database-url = "*"
 gunicorn = "*"
 django-heroku = "*"
 django-model-utils = "*"
+loguru = "*"
 
 [tool.poetry.dev-dependencies]
 ipython = "*"
