@@ -19,6 +19,8 @@ class TransactionSerializer(serializers.ModelSerializer):
     category = serializers.CharField(source="category.name", max_length=30, required=True)
     user_email = serializers.EmailField(source="user.email", max_length=30, required=True)
     reference = serializers.CharField(max_length=30, required=True)
+    amount = serializers.DecimalField(max_digits=10, decimal_places=2)
+    date = serializers.DateField()
 
     def validate_reference(self, value):
         if (
