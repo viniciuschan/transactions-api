@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 import factory
 from factory.django import DjangoModelFactory
 from faker import Faker
@@ -33,7 +35,7 @@ class TransactionFactory(DjangoModelFactory):
 
     reference = fake.numerify()
     date = "2022-03-08"
-    amount = "500.00"
-    kind = Transaction.Type.INFLOW
+    amount = Decimal("500.00")
+    type = Transaction.INFLOW
     category = factory.SelfAttribute("categ")
     user = factory.SelfAttribute("profile")

@@ -29,8 +29,8 @@ INSTALLED_APPS = [
     "src",
 ]
 
-THROTTLING_ANON_USER_LIMIT = config("THROTTLING_ANON_USER_LIMIT", default="500")
-THROTTLING_USER_LIMIT = config("THROTTLING_USER_LIMIT", default="1000")
+THROTTLING_ANON_USER_LIMIT = config("THROTTLING_ANON_USER_LIMIT", default="1000")
+THROTTLING_USER_LIMIT = config("THROTTLING_USER_LIMIT", default="10000")
 
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.coreapi.AutoSchema",
@@ -112,6 +112,8 @@ USE_TZ = True
 STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+BULK_CREATE_MAX_SIZE = config("BULK_CREATE_MAX_BATCH_SIZE", default=100)
 
 
 # heroku

@@ -49,12 +49,15 @@ def test_get_category_id(category_name, categories_count):
 
 def test_transaction_serializer_success(transaction_payload):
     serializer = TransactionSerializer(data=transaction_payload)
-    serializer.is_valid(raise_exception=True) is True
+    serializer.is_valid() is True
     serializer.save()
 
-    Transaction.objects.count() == 1
-    Category.objects.count() == 1
-    Customer.objects.count() == 1
+    transaction = Transaction.objects.get(reference=transaction_payload["reference"])
+    assert transaction.reference == transaction_payload["reference"]
+    assert transaction.type == transaction_payload["type"]
+    assert transaction.user.email == transaction_payload["user_email"]
+    assert transaction.category.name == transaction_payload["category"]
+    assert str(transaction.amount) == transaction_payload["amount"]
 
 
 def test_transaction_serializer_invalid_email(transaction_payload):
@@ -65,17 +68,25 @@ def test_transaction_serializer_invalid_email(transaction_payload):
 
     with pytest.raises(serializers.ValidationError):
         serializer.is_valid(raise_exception=True)
+    assert "user_email" in serializer.errors.keys()
 
-    assert Category.objects.exists() is False
-    assert Customer.objects.exists() is False
-    assert Transaction.objects.exists() is False
+
+def test_validate_transaction_type(transaction_payload):
+    payload = transaction_payload
+    payload["type"] = "asd"
+
+    serializer = TransactionSerializer(data=transaction_payload)
+
+    with pytest.raises(serializers.ValidationError):
+        serializer.is_valid(raise_exception=True)
+    assert "type" in serializer.errors.keys()
 
 
 @pytest.mark.parametrize(
     "transaction_type, transaction_amount",
     [
-        (Transaction.Type.INFLOW, "-100.00"),
-        (Transaction.Type.OUTFLOW, "100.00"),
+        ("inflow", "-100.00"),
+        ("outflow", "100.00"),
     ],
 )
 def test_transaction_serializer_invalid_transaction_amount(
@@ -95,7 +106,3 @@ def test_transaction_serializer_invalid_transaction_amount(
 
     with pytest.raises(serializers.ValidationError):
         serializer.is_valid(raise_exception=True)
-
-    assert Category.objects.exists() is False
-    assert Customer.objects.exists() is False
-    assert Transaction.objects.exists() is False

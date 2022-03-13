@@ -1,7 +1,5 @@
-from django.core.exceptions import ValidationError as DjangoValidationError
-from django.core.validators import validate_email
+from django.conf import settings
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
 
 from .models import Category, Customer, Transaction
 
@@ -17,42 +15,46 @@ def get_category_id(name):
 
 
 class TransactionSerializer(serializers.ModelSerializer):
-    category = serializers.CharField(source="category.name")
-    user_email = serializers.CharField(source="user.email", required=True)
-    type = serializers.CharField(source="kind")
-    reference = serializers.CharField(
-        max_length=50, validators=[UniqueValidator(queryset=Transaction.objects.all())]
-    )
+    type = serializers.CharField(max_length=7, required=True)
+    category = serializers.CharField(source="category.name", max_length=30, required=True)
+    user_email = serializers.EmailField(source="user.email", max_length=30, required=True)
+    reference = serializers.CharField(max_length=30, required=True)
 
-    def validate_user_email(self, value):
-        try:
-            validate_email(value)
-        except DjangoValidationError:
-            raise serializers.ValidationError("Invalid e-mail format")
+    def validate_reference(self, value):
+        if (
+            self.instance
+            and Transaction.objects.exclude(id=self.instance.id).filter(reference=value).exists()
+        ):
+            raise serializers.ValidationError("Invalid reference")
         return value
 
-    def _validate_transaction(self, kind, amount):
-        match kind:
-            case Transaction.Type.INFLOW:
+    def validate_type(self, value):
+        if value not in Transaction.Types:
+            raise serializers.ValidationError("Invalid transaction type.")
+        return value
+
+    def _validate_transaction(self, transaction_type, amount):
+        match transaction_type:
+            case Transaction.INFLOW:
                 if amount < 0:
-                    raise serializers.ValidationError("Inflow transactions must have postive amount")
-            case Transaction.Type.OUTFLOW:
+                    raise serializers.ValidationError("Inflow transactions must have postive amount.")
+            case Transaction.OUTFLOW:
                 if amount > 0:
-                    raise serializers.ValidationError("Outflow transactions must have negative amount")
+                    raise serializers.ValidationError("Outflow transactions must have negative amount.")
 
     def validate(self, data):
-        kind, amount = data["kind"], data["amount"]
-        self._validate_transaction(kind, amount)
+        transaction_type, amount = data["type"], data["amount"]
+        self._validate_transaction(transaction_type, amount)
         return super().validate(data)
 
-    def save(self):
+    def save(self, **kwargs):
         validated_data = self.validated_data
 
         user_email = validated_data.pop("user")
         user_id = get_user_id(user_email)
 
-        category_name = validated_data.pop("category")
-        category_id = get_category_id(category_name)
+        category = validated_data.pop("category")
+        category_id = get_category_id(category)
 
         validated_data |= {"user_id": user_id, "category_id": category_id}
 
@@ -77,13 +79,26 @@ class TransactionBulkCreateSerializer(serializers.Serializer):
     def create(self, validated_data):
         data = validated_data["payload"]
 
+        instances = []
         for item in data:
-            item["category_id"] = get_category_id(item["category"])
-            item["user_id"] = get_user_id(item["user"])
+            if Transaction.objects.filter(reference=item["reference"]).exists():
+                continue
 
-            del item["category"]
-            del item["user"]
+            category_id = get_category_id(item["category"])
+            user_id = get_user_id(item["user"])
 
-        instances = [Transaction(**item) for item in data]
+            instance = Transaction(
+                reference=item["reference"],
+                date=item["date"],
+                amount=item["amount"],
+                type=item["type"],
+                category_id=category_id,
+                user_id=user_id,
+            )
+            instances.append(instance)
 
-        return Transaction.objects.bulk_create(instances)
+        return Transaction.objects.bulk_create(
+            instances,
+            batch_size=settings.BULK_CREATE_MAX_SIZE,
+            ignore_conflicts=True,
+        )
