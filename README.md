@@ -26,19 +26,19 @@ git clone git@github.com:viniciuschan/transactions-api.git
 
 2. In the project root directory, there are some useful Makefile commands.
 
-3. You can check all test cases by running:
-```
-make test
-```
-
-4. To start the service using docker-compose run the following command:
+3. To start the service using docker-compose run the following command:
 ```
 make run
 ```
 
-5. As soon as your containers are up, you must migrate the data structure:
+4. As soon as your containers are up, you must migrate the data structure:
 ```
 make migrate
+```
+
+5. You can check all test cases by running:
+```
+make test
 ```
 
 6. I prepared a script to load 3.2M transactions records for testing purposes. This is the command:
@@ -46,7 +46,7 @@ make migrate
 make load_data
 ```
 
-6. In my machine it took about 4~5 min for loading this test database.
+* PS: On my computer it took about 4~5 min for loading all the test database.
 
 
 =============
