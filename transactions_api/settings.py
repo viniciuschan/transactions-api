@@ -80,10 +80,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "transactions_api.wsgi.application"
 
-# run tests in memmory locally, instead of creating a database
-IN_MEMORY_DATABASE_URL = "sqlite:///" + os.path.join(BASE_DIR, "db.sqlite3")
-
-DATABASES = {"default": config("DATABASE_URL", default=IN_MEMORY_DATABASE_URL, cast=parse_db_url)}
+DATABASES = {"default": config("DATABASE_URL", cast=parse_db_url)}
 
 AUTH_PASSWORD_VALIDATORS = [
     {
