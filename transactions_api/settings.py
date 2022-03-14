@@ -43,6 +43,8 @@ REST_FRAMEWORK = {
         "anon": f"{THROTTLING_ANON_USER_LIMIT}/day",
         "user": f"{THROTTLING_USER_LIMIT}/day",
     },
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 100,
 }
 
 MIDDLEWARE = [
