@@ -63,7 +63,6 @@ class TransactionViewSet(viewsets.ModelViewSet):
 
         transactions = (
             Transaction.objects.filter(user=customer)
-            .select_related("category")
             .values("amount", category_name=F("category__name"))
             .annotate(
                 kind=Case(

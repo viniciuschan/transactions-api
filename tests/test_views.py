@@ -1,5 +1,7 @@
 from decimal import Decimal
 
+from django.db import connection
+from django.test import override_settings
 from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
@@ -88,48 +90,6 @@ def test_list_transactions_success():
     assert response.status_code == status.HTTP_200_OK
 
 
-def test_calculate_total_flow_by_users_transactions():
-    customer1 = CustomerFactory.create(email="dev1@test.com")
-    customer2 = CustomerFactory.create(email="dev2@test.com")
-
-    TransactionFactory.create(
-        reference="000100",
-        type=Transaction.INFLOW,
-        amount=Decimal("100.00"),
-        user_id=customer1.id,
-    )
-    TransactionFactory.create(
-        reference="000200",
-        type=Transaction.OUTFLOW,
-        amount=Decimal("-100.00"),
-        user_id=customer1.id,
-    )
-    TransactionFactory.create(
-        reference="000300",
-        type=Transaction.OUTFLOW,
-        amount=Decimal("-1000.00"),
-        user_id=customer2.id,
-    )
-    url = reverse("transactions-list") + "group-by-user/"
-
-    expected_result = [
-        {
-            "total_inflow": 100.0,
-            "total_outflow": -100.0,
-            "user_email": "dev1@test.com",
-        },
-        {
-            "total_inflow": 0.0,
-            "total_outflow": -1000.0,
-            "user_email": "dev2@test.com",
-        },
-    ]
-
-    response = client.get(url)
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json() == expected_result
-
-
 def test_bulk_create_transactions_success():
     payload = [
         {
@@ -210,8 +170,56 @@ def test_bulk_create_transactions_with_invalid_format():
     assert response.json() == expected_result
 
 
+@override_settings(DEBUG=True)
+def test_calculate_total_flow_by_users_transactions():
+    customer1 = CustomerFactory.create(email="dev1@test.com")
+    customer2 = CustomerFactory.create(email="dev2@test.com")
+
+    TransactionFactory.create(
+        reference="000100",
+        type=Transaction.INFLOW,
+        amount=Decimal("100.00"),
+        user_id=customer1.id,
+    )
+    TransactionFactory.create(
+        reference="000200",
+        type=Transaction.OUTFLOW,
+        amount=Decimal("-100.00"),
+        user_id=customer1.id,
+    )
+    TransactionFactory.create(
+        reference="000300",
+        type=Transaction.OUTFLOW,
+        amount=Decimal("-1000.00"),
+        user_id=customer2.id,
+    )
+    url = reverse("transactions-list") + "group-by-user/"
+
+    expected_result = [
+        {
+            "total_inflow": 100.0,
+            "total_outflow": -100.0,
+            "user_email": "dev1@test.com",
+        },
+        {
+            "total_inflow": 0.0,
+            "total_outflow": -1000.0,
+            "user_email": "dev2@test.com",
+        },
+    ]
+
+    response = client.get(url)
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == expected_result
+
+    # optimized query
+    assert len(connection.queries) == 1
+
+
+@override_settings(DEBUG=True)
 def test_get_summary_transactions_by_email_success():
     customer = CustomerFactory.create(email="dev@test.com")
+    customer2 = CustomerFactory.create(email="dev2@test.com")
     category1 = CategoryFactory.create(name="salary")
     category2 = CategoryFactory.create(name="savings")
     category3 = CategoryFactory.create(name="groceries")
@@ -253,6 +261,13 @@ def test_get_summary_transactions_by_email_success():
         user=customer,
         category=category5,
     )
+    TransactionFactory.create(
+        reference="000600",
+        type=Transaction.INFLOW,
+        amount=Decimal("100000.72"),
+        user=customer2,
+        category=category5,
+    )
 
     expected_result = {
         "inflow": {
@@ -270,6 +285,9 @@ def test_get_summary_transactions_by_email_success():
     response = client.get(url)
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == expected_result
+
+    # optimized query
+    assert len(connection.queries) == 2
 
 
 def test_get_summary_transactions_by_email_user_not_found():
