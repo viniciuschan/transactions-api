@@ -220,6 +220,8 @@ Endpoint: **/v1/docs**
 
 * I did some load tests with approximately 3.2M database registers for a given user. The "summary" and "group-by-user" queries presented good performance (+- 500ms).
 
+* PS*: I should have configured the project with Pipenv instead of Poetry, so heroku would consider pipfile.lock. As I used poetry, I needed to generate a requirements.txt in the root so that the project could be recognized by the Heroku builder.
+
 Well, I put a lot of effort into this project.
 
 I hope you enjoy it =]
