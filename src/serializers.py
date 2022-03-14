@@ -107,6 +107,6 @@ class TransactionBulkCreateSerializer(serializers.Serializer):
 
         return Transaction.objects.bulk_create(
             instances,
-            batch_size=settings.BULK_CREATE_MAX_SIZE,
+            batch_size=settings.BULK_CREATE_BATCH_SIZE,
             ignore_conflicts=True,
         )

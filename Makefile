@@ -1,14 +1,14 @@
 lint:
 	poetry run pre-commit install && poetry run pre-commit run -a -v
 
-test:
-	poetry run pytest -sx
-
 migrations:
 	poetry run python manage.py makemigrations
 
 migrate:
 	docker-compose exec transactions-api su -c "python manage.py migrate"
+
+test:
+	docker-compose exec transactions-api su -c "poetry run pytest -sx"
 
 create_fixtures:
 	docker-compose exec transactions-api su -c "python manage.py loaddata categories.json"

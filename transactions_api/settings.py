@@ -113,7 +113,7 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-BULK_CREATE_MAX_SIZE = config("BULK_CREATE_MAX_BATCH_SIZE", default=100)
+BULK_CREATE_BATCH_SIZE = config("BULK_CREATE_BATCH_SIZE", default=1000, cast=int)
 
 # heroku
 django_heroku.settings(locals(), databases=False)
