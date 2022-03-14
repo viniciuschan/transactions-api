@@ -189,6 +189,11 @@ Response content:
 }
 ```
 
+## Swagger Documentation
+
+Endpoint: **/v1/docs**
+
+
 =============
 
 ## Some important considerations about this implementation:
