@@ -1,7 +1,7 @@
 import itertools
 from operator import itemgetter
 
-from django.db.models import Case, F, Q, Sum, Value, When
+from django.db.models import F, Q, Sum
 from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -53,7 +53,6 @@ class TransactionViewSet(viewsets.ModelViewSet):
                 ),
             )
         )
-
         return Response(data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=["get"], url_path="summary")
@@ -62,25 +61,21 @@ class TransactionViewSet(viewsets.ModelViewSet):
         customer = get_object_or_404(Customer, email=user_email)
 
         transactions = (
-            Transaction.objects.filter(user=customer)
-            .values("amount", category_name=F("category__name"))
-            .annotate(
-                kind=Case(
-                    When(type=Transaction.INFLOW, then=Value("inflow")),
-                    When(type=Transaction.OUTFLOW, then=Value("outflow")),
-                )
-            )
+            Transaction.objects.filter(user_id=customer.id)
+            .values("type", category_name=F("category__name"))
+            .annotate(total_amount=Sum(F("amount")))
         )
 
-        data = {
+        response_data = {
             "inflow": {},
             "outflow": {},
         }
 
-        for key, group in itertools.groupby(transactions, key=itemgetter("kind")):
+        for key, group in itertools.groupby(transactions, key=itemgetter("type")):
             categories = list(group)
 
             for item in categories:
-                data[key].setdefault(item["category_name"], str(item["amount"]))
+                category = item["category_name"]
+                response_data[key].setdefault(category, item["total_amount"])
 
-        return Response(data, status.HTTP_200_OK)
+        return Response(response_data, status.HTTP_200_OK)

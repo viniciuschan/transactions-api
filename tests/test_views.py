@@ -115,6 +115,23 @@ def test_bulk_create_transactions_success():
     assert response.status_code == status.HTTP_201_CREATED
 
 
+def test_bulk_create_transactions_invalid_data():
+    payload = [
+        {
+            "reference": "0000001",
+            "date": "2022-03-09",
+            "amount": "100.00",
+            "type": Transaction.OUTFLOW,
+            "user_email": "dev1@email.com",
+            "category": "category_name",
+        },
+    ]
+    url = reverse("transactions-list") + "bulk/"
+
+    response = client.post(url, data=payload, format="json")
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
 def test_bulk_create_transactions_with_duplicated_items():
     TransactionFactory.create(
         reference="0000001",
@@ -242,27 +259,41 @@ def test_get_summary_transactions_by_email_success():
     )
     TransactionFactory.create(
         reference="000300",
+        type=Transaction.INFLOW,
+        amount=Decimal("1000.00"),
+        user=customer,
+        category=category2,
+    )
+    TransactionFactory.create(
+        reference="000400",
         type=Transaction.OUTFLOW,
         amount=Decimal("-51.13"),
         user=customer,
         category=category3,
     )
     TransactionFactory.create(
-        reference="000400",
+        reference="000500",
         type=Transaction.OUTFLOW,
         amount=Decimal("-560.00"),
         user=customer,
         category=category4,
     )
     TransactionFactory.create(
-        reference="000500",
+        reference="000600",
         type=Transaction.OUTFLOW,
-        amount=Decimal("-150.72"),
+        amount=Decimal("-150.00"),
         user=customer,
         category=category5,
     )
     TransactionFactory.create(
-        reference="000600",
+        reference="000700",
+        type=Transaction.OUTFLOW,
+        amount=Decimal("-150.00"),
+        user=customer,
+        category=category5,
+    )
+    TransactionFactory.create(
+        reference="000800",
         type=Transaction.INFLOW,
         amount=Decimal("100000.72"),
         user=customer2,
@@ -271,13 +302,13 @@ def test_get_summary_transactions_by_email_success():
 
     expected_result = {
         "inflow": {
-            "salary": "2500.00",
-            "savings": "150.72",
+            "salary": 2500.00,
+            "savings": 1150.72,
         },
         "outflow": {
-            "groceries": "-51.13",
-            "rent": "-560.00",
-            "transfer": "-150.72",
+            "groceries": -51.13,
+            "rent": -560.00,
+            "transfer": -300.00,
         },
     }
     url = reverse("transactions-list") + "summary/?user_email=dev@test.com"
