@@ -201,6 +201,8 @@ Response content:
 
 * Added soft-delete for transaction's model, so it can be safely deleted;
 
+* When creating a transaction, if the corresponding user does not exist in the database, a new one will be created.
+
 * Because it is an API, I added the DRF throttling functionality. The rate limit values ​​can be controlled by environment variable;
 
 * Added logs to map exception cases in serializer validations;
