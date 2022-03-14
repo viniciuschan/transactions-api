@@ -65,23 +65,7 @@ Body contract:
     "amount": "1000.00",
     "type": "inflow",
     "category": "category_name",
-    "user_email": "dev@example.com",
-}
-```
-
-#### UPDATE
-
-Endpoint: **/v1/transactions/<uuid>/**
-
-Body contract:
-```
-{
-    "reference": "0000000000001",
-    "date": "2020-03-01",
-    "amount": "5000.00",
-    "type": "inflow",
-    "category": "category_name",
-    "user_email": "dev@example.com",
+    "user_email": "dev@example.com"
 }
 ```
 
@@ -115,7 +99,7 @@ Response:
 
 #### GET
 
-Endpoint: **/v1/transactions/<uuid>/**
+Endpoint: **/v1/transactions/uuid/**
 
 Response:
 ```
@@ -156,7 +140,7 @@ Body contract:
 ]
 ```
 
-## How to consult total flow per user
+## How to consult total flow amount per user
 
 Method: GET
 
@@ -167,18 +151,18 @@ Response content:
 [
     {
         "user_email": "dev1@test.com",
-        "total_inflow": 1100.0,
-        "total_outflow": -650.0
+        "total_inflow": "1100.00",
+        "total_outflow": "-650.00"
     },
     {
         "user_email": "dev2@test.com",
-        "total_inflow": 100000.0,
-        "total_outflow": 0.0
+        "total_inflow": "100000.00",
+        "total_outflow": "0.00"
     }
 ]
 ```
 
-## How to consult a summary of transactions by user and categories
+## How to consult a summary of transactions amount by categories per user
 
 Method: GET
 
@@ -194,7 +178,7 @@ Response content:
     "outflow": {
         "groceries": "-51.13",
         "rent": "-560.00",
-        "transfer": "-150.72",
+        "transfer": "-150.72"
     }
 }
 ```
