@@ -41,10 +41,12 @@ make run
 make migrate
 ```
 
-6. I prepared a fixture file to load initial items for testing purposes:
+6. I prepared a script to load 3.2M transactions records for testing purposes. This is the command:
 ```
-make create_fixtures
+make load_data
 ```
+
+6. In my machine it took about 4~5 min for loading this test database.
 
 
 =============
@@ -64,7 +66,7 @@ Body contract:
     "date": "2022-03-01",
     "amount": "1000.00",
     "type": "inflow",
-    "category": "category_name",
+    "category": "category-name",
     "user_email": "dev@example.com"
 }
 ```
@@ -75,26 +77,31 @@ Endpoint: **/v1/transactions/**
 
 Response:
 ```
-[
-    {
-        "id": "9b140ab4-6805-43fa-bb0b-c3b0cc869ba8",
-        "reference": "00001",
-        "date": "2022-03-01",
-        "amount": "1000.00",
-        "type": "inflow",
-        "category": "category1",
-        "user_email": "dev1@test.com"
-    },
-    {
-        "id": "cfade2c7-40cc-4e07-bcd2-82a5b1d99404",
-        "reference": "00002",
-        "date": "2022-02-10",
-        "amount": "-100.00",
-        "type": "outflow",
-        "category": "category1",
-        "user_email": "dev1@test.com"
-    }
-]
+{
+    "count": 240004,
+    "next": "http://127.0.0.1:8000/v1/transactions/?page=2",
+    "previous": null,
+    "results": [
+        {
+            "id": "c748798a-6110-4466-90cc-35360773a745",
+            "reference": "0",
+            "date": "2022-10-10",
+            "amount": "100.00",
+            "type": "inflow",
+            "category": "category-A",
+            "user_email": "dev@test.com"
+        },
+        {
+            "id": "1880b4e3-2223-4bf2-901b-6d965a331bdd",
+            "reference": "1600000",
+            "date": "2022-10-10",
+            "amount": "1000.00",
+            "type": "inflow",
+            "category": "category-B",
+            "user_email": "dev@test.com"
+        }
+    ]
+{
 ```
 
 #### GET
@@ -104,13 +111,13 @@ Endpoint: **/v1/transactions/uuid/**
 Response:
 ```
 {
-    "id": "9b140ab4-6805-43fa-bb0b-c3b0cc869ba8",
-    "reference": "00001",
-    "date": "2022-03-01",
-    "amount": "1000.00",
+    "id": "c748798a-6110-4466-90cc-35360773a745",
+    "reference": "123",
+    "date": "2022-10-10",
+    "amount": "100.00",
     "type": "inflow",
-    "category": "category1",
-    "user_email": "dev1@test.com"
+    "category": "category-A",
+    "user_email": "dev@test.com"
 }
 ```
 
@@ -122,20 +129,20 @@ Body contract:
 ```
 [
     {
-        "reference": "123",
+        "reference": "99999999",
         "date": "2020-01-03",
         "amount": "100.00",
         "type": "inflow",
-        "category": "dev1",
-        "user_email": "dev1@test.com"
+        "category": "category-B",
+        "user_email": "dev2@test.com"
     },
     {
-        "reference": "321",
+        "reference": "999999999999999",
         "date": "2020-03-10",
-        "amount": "100.00",
+        "amount": "-100.00",
         "type": "outflow",
-        "category": "dev1",
-        "user_email": "dev1@test.com"
+        "category": "category-C",
+        "user_email": "dev2@test.com"
     }
 ]
 ```
@@ -150,14 +157,14 @@ Response content:
 ```
 [
     {
-        "user_email": "dev1@test.com",
-        "total_inflow": "1100.00",
-        "total_outflow": "-650.00"
+        "user_email": "dev2@test.com",
+        "total_inflow": "100.00",
+        "total_outflow": "-100.00"
     },
     {
-        "user_email": "dev2@test.com",
-        "total_inflow": "100000.00",
-        "total_outflow": "0.00"
+        "user_email": "dev@test.com",
+        "total_inflow": "879451100.00",
+        "total_outflow": "-879451100.00"
     }
 ]
 ```
@@ -166,19 +173,18 @@ Response content:
 
 Method: GET
 
-Endpoint: **/v1/transactions/summary/?user_email=dev@test.com**
+Endpoint: **/transactions/summary/?user_email=dev@test.com**
 
 Response content:
 ```
 {
     "inflow": {
-        "salary": "2500.00",
-        "savings": "150.72",
+        "category-A": "79950100.00",
+        "category-B": "799501000.00"
     },
     "outflow": {
-        "groceries": "-51.13",
-        "rent": "-560.00",
-        "transfer": "-150.72"
+        "category-A": "-79950100.00",
+        "category-B": "-799501000.00"
     }
 }
 ```
@@ -187,7 +193,7 @@ Response content:
 
 ## Some important considerations about this implementation:
 
-* In bulk create, if you pass a list of transactions with duplicate reference values, only the first one will be created and the rest will be silently discarded;
+* In bulk create, if you pass a list of transactions with duplicate reference values, only the first one will be created and the rest will be silently discarded. (logged as warning);
 
 * Still in bulk create, if a transaction already exists in database, when trying to create another one with the same reference key, the duplicated item will be discarded and the stored item will be kept unchanged. However, if you pass any invalid item in the bulk create list of items, the entire transaction will be aborted and no item will be created.
 
@@ -201,9 +207,11 @@ Response content:
 
 * For convenience, I created a simple customer model. But I could have extended django's django.contrib.auth.User class if I needed better access control.
 
-* Also for convenience, I created some implementations within a single file, but in production it might make sense to separate them into different apps.
+* Also for convenience, I created some implementations within a single app and single files, but in production it might make sense to separate them into different apps.
 
-* I did a load test with approximately 3M database registers and the queries presented good performance.
+* For the Transaction.type attribute I tested a models.SmallIntegerField() with db_index=True and the queries had practically the same result as storing the strings "inflow" and "outflow". So I decided to leave it that way for convenience.
+
+* I did some load tests with approximately 3.2M database registers for a given user. The "summary" and "group-by-user" queries presented good performance (+- 500ms).
 
 Well, I put a lot of effort into this project.
 
