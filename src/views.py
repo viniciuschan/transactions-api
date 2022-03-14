@@ -71,7 +71,12 @@ class TransactionViewSet(viewsets.ModelViewSet):
         transactions = (
             Transaction.objects.filter(user_id=customer.id)
             .values("type", category_name=F("category__name"))
-            .annotate(total_amount=Sum(F("amount")))
+            .annotate(
+                total_amount=Cast(
+                    Sum(F("amount")),
+                    output_field=CharField(),
+                )
+            )
         )
 
         response_data = {
@@ -84,6 +89,6 @@ class TransactionViewSet(viewsets.ModelViewSet):
 
             for item in categories:
                 category = item["category_name"]
-                response_data[key].setdefault(category, str(item["total_amount"]))
+                response_data[key].setdefault(category, item["total_amount"])
 
         return Response(response_data, status.HTTP_200_OK)
