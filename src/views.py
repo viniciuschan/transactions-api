@@ -1,7 +1,9 @@
 import itertools
+from decimal import Decimal
 from operator import itemgetter
 
-from django.db.models import F, Q, Sum
+from django.db.models import CharField, F, Q, Sum
+from django.db.models.functions import Cast
 from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -36,24 +38,30 @@ class TransactionViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=["get"], url_path="group-by-user")
     def calculate_total_flow_by_user(self, request, *args, **kwargs):
-        data = (
+        response_data = (
             Transaction.objects.values(user_email=F("user__email"))
             .annotate(
-                total_inflow=Sum(
-                    F("amount"),
-                    filter=Q(type=Transaction.INFLOW),
-                    default=0,
-                ),
+                total_inflow=Cast(
+                    Sum(
+                        F("amount"),
+                        filter=Q(type=Transaction.INFLOW),
+                        default=Decimal("0.00"),
+                    ),
+                    output_field=CharField(),
+                )
             )
             .annotate(
-                total_outflow=Sum(
-                    F("amount"),
-                    filter=Q(type=Transaction.OUTFLOW),
-                    default=0,
-                ),
+                total_outflow=Cast(
+                    Sum(
+                        F("amount"),
+                        filter=Q(type=Transaction.OUTFLOW),
+                        default=Decimal("0.00"),
+                    ),
+                    output_field=CharField(),
+                )
             )
         )
-        return Response(data, status=status.HTTP_200_OK)
+        return Response(response_data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=["get"], url_path="summary")
     def get_summary_transactions_by_email(self, request, *args, **kwargs):
@@ -76,6 +84,6 @@ class TransactionViewSet(viewsets.ModelViewSet):
 
             for item in categories:
                 category = item["category_name"]
-                response_data[key].setdefault(category, item["total_amount"])
+                response_data[key].setdefault(category, str(item["total_amount"]))
 
         return Response(response_data, status.HTTP_200_OK)

@@ -191,11 +191,12 @@ def test_bulk_create_transactions_with_invalid_format():
 def test_calculate_total_flow_by_users_transactions():
     customer1 = CustomerFactory.create(email="dev1@test.com")
     customer2 = CustomerFactory.create(email="dev2@test.com")
+    customer3 = CustomerFactory.create(email="dev3@test.com")
 
     TransactionFactory.create(
         reference="000100",
         type=Transaction.INFLOW,
-        amount=Decimal("100.00"),
+        amount=Decimal("100.25"),
         user_id=customer1.id,
     )
     TransactionFactory.create(
@@ -207,21 +208,32 @@ def test_calculate_total_flow_by_users_transactions():
     TransactionFactory.create(
         reference="000300",
         type=Transaction.OUTFLOW,
-        amount=Decimal("-1000.00"),
+        amount=Decimal("-1000.37"),
         user_id=customer2.id,
+    )
+    TransactionFactory.create(
+        reference="000400",
+        type=Transaction.INFLOW,
+        amount=Decimal("10000.20"),
+        user_id=customer3.id,
     )
     url = reverse("transactions-list") + "group-by-user/"
 
     expected_result = [
         {
-            "total_inflow": 100.0,
-            "total_outflow": -100.0,
+            "total_inflow": "100.25",
+            "total_outflow": "-100.00",
             "user_email": "dev1@test.com",
         },
         {
-            "total_inflow": 0.0,
-            "total_outflow": -1000.0,
+            "total_inflow": "0.00",
+            "total_outflow": "-1000.37",
             "user_email": "dev2@test.com",
+        },
+        {
+            "total_inflow": "10000.20",
+            "total_outflow": "0.00",
+            "user_email": "dev3@test.com",
         },
     ]
 
@@ -302,13 +314,13 @@ def test_get_summary_transactions_by_email_success():
 
     expected_result = {
         "inflow": {
-            "salary": 2500.00,
-            "savings": 1150.72,
+            "salary": "2500.00",
+            "savings": "1150.72",
         },
         "outflow": {
-            "groceries": -51.13,
-            "rent": -560.00,
-            "transfer": -300.00,
+            "groceries": "-51.13",
+            "rent": "-560.00",
+            "transfer": "-300.00",
         },
     }
     url = reverse("transactions-list") + "summary/?user_email=dev@test.com"
