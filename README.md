@@ -200,3 +200,27 @@ Response content:
 ```
 
 =============
+
+## Some important considerations about this implementation:
+
+* In bulk create, if you pass a list of transactions with duplicate reference values, only the first one will be created and the rest will be silently discarded;
+
+* Still in bulk create, if a transaction already exists in database, when trying to create another one with the same reference key, the duplicated item will be discarded and the stored item will be kept unchanged. However, if you pass any invalid item in the bulk create list of items, the entire transaction will be aborted and no item will be created.
+
+* PATCH AND PUT operations have been disabled to maintain transactions integrity;
+
+* Added soft-delete for transaction's model, so it can be safely deleted;
+
+* Because it is an API, I added the DRF throttling functionality. The rate limit values ​​can be controlled by environment variable;
+
+* Added logs to map exception cases in serializer validations;
+
+* For convenience, I created a simple customer model. But I could have extended django's django.contrib.auth.User class if I needed better access control.
+
+* Also for convenience, I created some implementations within a single file, but in production it might make sense to separate them into different apps.
+
+* I did a load test with approximately 3M database registers and the queries presented good performance.
+
+Well, I put a lot of effort into this project.
+
+I hope you enjoy it =]

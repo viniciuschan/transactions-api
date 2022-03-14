@@ -1,3 +1,4 @@
+# Development shortcuts
 lint:
 	poetry run pre-commit install && poetry run pre-commit run -a -v
 
@@ -22,7 +23,7 @@ run:
 	docker-compose up
 
 
-# Heroku development shortcuts
+# Heroku shortcuts
 logs:
 	heroku logs --app belvo-transactions-api --tail
 
