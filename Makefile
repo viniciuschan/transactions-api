@@ -11,16 +11,17 @@ migrate:
 test:
 	docker-compose exec transactions-api su -c "poetry run pytest -sx"
 
-create_fixtures:
-	docker-compose exec transactions-api su -c "python manage.py loaddata categories.json"
-	docker-compose exec transactions-api su -c "python manage.py loaddata customers.json"
-	docker-compose exec transactions-api su -c "python manage.py loaddata transactions.json"
+load_data:
+	docker-compose exec transactions-api su -c "python manage.py shell < script_load_test_data.py"
 
 shell:
 	docker-compose exec transactions-api su -c "pip install ipython && python manage.py shell"
 
 run:
 	docker-compose up
+
+drop:
+	docker-compose down
 
 
 # Heroku shortcuts
