@@ -151,7 +151,7 @@ Body contract:
 
 Method: GET
 
-Endpoint: **/transactions/?search=800001**
+Endpoint: **/v1/transactions/?search=800001**
 
 Response content:
 ```
