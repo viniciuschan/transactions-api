@@ -90,6 +90,25 @@ def test_list_transactions_success():
     assert response.status_code == status.HTTP_200_OK
 
 
+def test_list_filtering_transaction_by_reference_code():
+    TransactionFactory.create()
+    transaction = TransactionFactory.create(reference="99999")
+
+    url = reverse("transactions-list") + f"?search={transaction.reference}"
+    response = client.get(url)
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["count"] == 1
+    assert transaction.reference == response.json()["results"][0]["reference"]
+
+
+def test_list_filtering_by_reference_code_if_transaction_does_not_exist():
+    url = reverse("transactions-list") + "?search=999999"
+    response = client.get(url)
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["count"] == 0
+    assert response.json()["results"] == []
+
+
 def test_bulk_create_transactions_success():
     payload = [
         {

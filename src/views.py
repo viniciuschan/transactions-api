@@ -5,7 +5,7 @@ from operator import itemgetter
 from django.db.models import CharField, F, Q, Sum
 from django.db.models.functions import Cast
 from django.shortcuts import get_object_or_404
-from rest_framework import status, viewsets
+from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.response import Response
@@ -17,6 +17,8 @@ from .serializers import TransactionBulkCreateSerializer, TransactionSerializer
 class TransactionViewSet(viewsets.ModelViewSet):
     queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ("=reference",)
 
     def update(self, request, *args, **kwargs):
         raise MethodNotAllowed(request.method)
