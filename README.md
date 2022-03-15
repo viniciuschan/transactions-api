@@ -147,6 +147,32 @@ Body contract:
 ]
 ```
 
+## How to filter a transaction by it's reference code
+
+Method: GET
+
+Endpoint: **/transactions/?search=800001**
+
+Response content:
+```
+{
+    "count": 1,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "id": "929d4f05-b52e-4351-95b9-24bdebc292b5",
+            "reference": "800001",
+            "date": "2022-10-10",
+            "amount": "-100.00",
+            "type": "outflow",
+            "category": "category-A",
+            "user_email": "dev@test.com"
+        }
+    ]
+}
+```
+
 ## How to consult total flow amount per user
 
 Method: GET

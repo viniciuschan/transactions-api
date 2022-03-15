@@ -9,7 +9,7 @@ known_local_folder = ["src", "tests", "transactions_api"]
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "transactions_api.settings"
-addopts = "-vv"
+addopts = "-vv --cov=src --cov-report=term-missing"
 
 [tool.poetry]
 name = "transactions-api"
@@ -21,13 +21,13 @@ authors = ["Vinicius Chan <vchanbr@gmail.com>"]
 python = "^3.10"
 django = "==4.0.3"
 djangorestframework = "==3.13.1"
-django-rest-swagger = "*"
-python-decouple = "*"
-psycopg2 = "*"
-dj-database-url = "*"
-gunicorn = "*"
 django-heroku = "*"
 django-model-utils = "*"
+django-rest-swagger = "*"
+dj-database-url = "*"
+gunicorn = "*"
+psycopg2 = "*"
+python-decouple = "*"
 loguru = "*"
 
 [tool.poetry.dev-dependencies]
@@ -37,6 +37,7 @@ faker = "*"
 pre-commit = "*"
 pytest = "*"
 pytest-django = "*"
+pytest-cov = "*"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
