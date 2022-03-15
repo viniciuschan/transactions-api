@@ -15,11 +15,11 @@ def get_category_id(name):
     return category.id
 
 
-class TransactionSerializer(serializers.ModelSerializer):
+class CustomTransactionSerializer(serializers.ModelSerializer):
     type = serializers.CharField(max_length=7, required=True)
     category = serializers.CharField(source="category.name", max_length=30, required=True)
     user_email = serializers.EmailField(source="user.email", max_length=30, required=True)
-    reference = serializers.CharField(max_length=30, required=True)
+    reference = serializers.CharField(max_length=20, required=True)
     amount = serializers.DecimalField(max_digits=10, decimal_places=2)
     date = serializers.DateField()
 
@@ -44,19 +44,6 @@ class TransactionSerializer(serializers.ModelSerializer):
         self._validate_transaction(transaction_type, amount, reference)
         return super().validate(data)
 
-    def save(self, **kwargs):
-        validated_data = self.validated_data
-
-        user_email = validated_data.pop("user")
-        user_id = get_user_id(user_email)
-
-        category = validated_data.pop("category")
-        category_id = get_category_id(category)
-
-        validated_data |= {"user_id": user_id, "category_id": category_id}
-
-        return super().save()
-
     class Meta:
         model = Transaction
         fields = (
@@ -70,19 +57,35 @@ class TransactionSerializer(serializers.ModelSerializer):
         )
 
 
+class TransactionSerializer(CustomTransactionSerializer):
+    def validate_reference(self, value):
+        if Transaction.objects.filter(reference=value).exists():
+            logger.warning(f"Reference={value} already exists.")
+            raise serializers.ValidationError("Reference={value} already exists.")
+        return value
+
+    def save(self, **kwargs):
+        validated_data = self.validated_data
+
+        user_email = validated_data.pop("user")
+        user_id = get_user_id(user_email)
+
+        category = validated_data.pop("category")
+        category_id = get_category_id(category)
+
+        validated_data |= {"user_id": user_id, "category_id": category_id}
+
+        return super().save()
+
+
 class TransactionBulkCreateSerializer(serializers.Serializer):
-    payload = TransactionSerializer(many=True)
+    payload = CustomTransactionSerializer(many=True)
 
     def create(self, validated_data):
         data = validated_data["payload"]
 
         instances = []
         for item in data:
-            reference = item["reference"]
-            if Transaction.objects.filter(reference=reference).exists():
-                logger.warning(f"Transaction reference={reference} already exists.")
-                continue
-
             category_id = get_category_id(item["category"])
             user_id = get_user_id(item["user"])
 

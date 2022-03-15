@@ -49,7 +49,7 @@ def test_get_category_id(category_name, categories_count):
 
 def test_transaction_serializer_success(transaction_payload):
     serializer = TransactionSerializer(data=transaction_payload)
-    serializer.is_valid() is True
+    assert serializer.is_valid() is True
     serializer.save()
 
     transaction = Transaction.objects.get(reference=transaction_payload["reference"])
@@ -76,34 +76,49 @@ def test_validate_transaction_type(transaction_payload):
     payload["type"] = "asd"
 
     serializer = TransactionSerializer(data=payload)
-
     with pytest.raises(serializers.ValidationError):
         serializer.is_valid(raise_exception=True)
     assert "type" in serializer.errors.keys()
 
 
-def test_bulk_create_serializer_if_transaction_already_exists(caplog):
-    transaction = TransactionFactory.create(reference="0000001")
+def test_validate_transaction_reference_if_already_exists(transaction_payload, caplog):
+    ref = transaction_payload["reference"]
+    TransactionFactory.create(reference=ref)
+    payload = transaction_payload
+    serializer = TransactionSerializer(data=payload)
+    with pytest.raises(serializers.ValidationError):
+        serializer.is_valid(raise_exception=True)
+    assert "reference" in serializer.errors.keys()
+
+    log_message = f"Reference={ref} already exists."
+    assert log_message in caplog.messages
+
+
+def test_bulk_create_serializer_if_transaction_already_exists():
+    transaction = TransactionFactory.create(
+        type=Transaction.INFLOW,
+        reference="001",
+        amount="9.99",
+    )
 
     test_data = {
         "payload": [
             {
-                "reference": "0000001",
+                "reference": "001",
                 "date": "2022-03-09",
-                "amount": "100.00",
-                "type": "inflow",
+                "amount": "-100.00",
+                "type": "outflow",
                 "user_email": "dev1@email.com",
                 "category": "category_name",
             },
         ]
     }
-
     serializer = TransactionBulkCreateSerializer(data=test_data)
     assert serializer.is_valid() is True
     serializer.save()
 
-    expected_log = f"Transaction reference={transaction.reference} already exists."
-    assert expected_log in caplog.messages
+    assert str(transaction.amount) == "9.99"
+    assert transaction.type == Transaction.INFLOW
 
 
 @pytest.mark.parametrize(
