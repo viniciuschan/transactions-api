@@ -23,15 +23,6 @@ class TransactionSerializer(serializers.ModelSerializer):
     amount = serializers.DecimalField(max_digits=10, decimal_places=2)
     date = serializers.DateField()
 
-    def validate_reference(self, value):
-        if (
-            self.instance
-            and Transaction.objects.exclude(id=self.instance.id).filter(reference=value).exists()
-        ):
-            logger.warning(f"Reference={value} already exists.")
-            raise serializers.ValidationError("Invalid reference")
-        return value
-
     def validate_type(self, value):
         if value not in Transaction.Types:
             raise serializers.ValidationError("Invalid transaction type.")
