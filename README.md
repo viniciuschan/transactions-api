@@ -1,4 +1,5 @@
-[![CircleCI](https://circleci.com/gh/viniciuschan/transactions-api/tree/main.svg?style=svg&circle-token=d1bb25356a754041bf1e1c454930ebdb89d94134)](https://circleci.com/gh/viniciuschan/transactions-api/tree/main)
+[![CircleCI](https://circleci.com/gh/viniciuschan/transactions-api/tree/main.svg?style=svg&circle-token=7676c82508f7784f861f720e1f6f3d5915579d4b)](https://circleci.com/gh/viniciuschan/transactions-api/tree/main)
+
 
 Check my APP: https://belvo-transactions-api.herokuapp.com/
 
