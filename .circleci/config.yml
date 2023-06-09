@@ -17,10 +17,13 @@ jobs:
       - checkout
 
       - run:
-          name: "Install project dependencies"
+          name: "Install poetry"
           command: |
             curl -sSL https://install.python-poetry.org | python3 -
-            poetry install
+
+      - run:
+          name: install dependencies
+          command: poetry install
 
       - run:
           name: "Run linters"
